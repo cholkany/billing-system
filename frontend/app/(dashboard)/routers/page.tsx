@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react'
 import Link from 'next/link'
 import {
@@ -23,26 +21,41 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { Empty } from '@/components/ui/empty'
-import { useRouter as useRouterContext } from '@/contexts/router-context'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
+import { routers } from '@/store/data'
+
 
 export default function RoutersPage() {
-  const { routers, setSelectedRouter } = useRouterContext()
-
-  if (routers.length === 0) {
+  //const { routers, setSelectedRouter } = useRouterContext()
+  
+  if (!routers) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <Empty
-          icon={Router}
-          title="No routers connected"
-          description="Add your first MikroTik router to start managing your network."
-        >
-          <Button asChild>
-            <Link href="/routers/add">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Router
-            </Link>
-          </Button>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Router />
+            </EmptyMedia>
+            <EmptyTitle>No routers connected</EmptyTitle>
+            <EmptyDescription>
+              Add your first MikroTik router to start managing your network.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <Link href="/routers/add">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Router
+              </Link>
+            </Button>
+          </EmptyContent>
         </Empty>
       </div>
     )
@@ -70,7 +83,6 @@ export default function RoutersPage() {
           <Card
             key={router.id}
             className="group relative cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
-            onClick={() => setSelectedRouter(router)}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -92,7 +104,7 @@ export default function RoutersPage() {
                   </div>
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -164,9 +176,8 @@ export default function RoutersPage() {
                 variant="secondary"
                 className="w-full"
                 asChild
-                onClick={(e) => e.stopPropagation()}
               >
-                <Link href={`/dashboard?router=${router.id}`}>
+                <Link href={`/${router.id}/`}>
                   Open Dashboard
                 </Link>
               </Button>

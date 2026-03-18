@@ -32,21 +32,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        selectedRouter={selectedRouter as { id: string; name: string; ip: string; status: 'online' | 'offline' } | null}
-        onRouterChange={(router) => {
-          const fullRouter = {
-            ...router,
-            port: 8728,
-            username: 'admin',
-          } as RouterType
-          setSelectedRouter(fullRouter)
-        }}
-      />
+      <AppSidebar/>
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex shrink-0 items-center gap-2 border-b px-4 py-5">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
               {breadcrumbs.map((crumb, index) => (

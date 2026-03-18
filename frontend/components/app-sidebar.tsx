@@ -56,54 +56,11 @@ const mockRouters: Router[] = [
   { id: '2', name: 'Branch Router', ip: '10.0.0.1', status: 'offline' },
 ]
 
-const mainNavItems = [
-  {
-    title: 'Dashboard',
-    icon: LayoutDashboard,
-    href: '/dashboard',
-  },
-  {
-    title: 'Routers',
-    icon: Router,
-    href: '/routers',
-  },
-]
-
-const hotspotNavItems = [
-  {
-    title: 'Profiles',
-    icon: UserCircle,
-    href: '/hotspot/profiles',
-  },
-  {
-    title: 'Users',
-    icon: Users,
-    href: '/hotspot/users',
-  },
-  {
-    title: 'Vouchers',
-    icon: Ticket,
-    href: '/hotspot/vouchers',
-  },
-  {
-    title: 'Statistics',
-    icon: BarChart3,
-    href: '/hotspot/stats',
-  },
-]
-
-const systemNavItems = [
-  {
-    title: 'Networks',
-    icon: Network,
-    href: '/networks',
-  },
-  {
-    title: 'Settings',
-    icon: Settings,
-    href: '/settings',
-  },
-]
+function withRouterPrefix(routerId: string | undefined, path: string) {
+  if (!routerId) return path
+  if (path === '/') return `/${routerId}`
+  return `/${routerId}${path.startsWith('/') ? '' : '/'}${path}`
+}
 
 interface AppSidebarProps {
   selectedRouter?: Router | null
@@ -117,6 +74,56 @@ export function AppSidebar({ selectedRouter, onRouterChange }: AppSidebarProps) 
   )
 
   const isRouterSelected = !!selectedRouter
+  const routerId = selectedRouter?.id
+
+  const mainNavItems = [
+    {
+      title: 'Dashboard',
+      icon: LayoutDashboard,
+      href: withRouterPrefix(routerId, '/'),
+    },
+    {
+      title: 'Routers',
+      icon: Router,
+      href: '/routers',
+    },
+  ]
+
+  const hotspotNavItems = [
+    {
+      title: 'Profiles',
+      icon: UserCircle,
+      href: withRouterPrefix(routerId, '/hotspot/profiles'),
+    },
+    {
+      title: 'Users',
+      icon: Users,
+      href: withRouterPrefix(routerId, '/hotspot/users'),
+    },
+    {
+      title: 'Vouchers',
+      icon: Ticket,
+      href: withRouterPrefix(routerId, '/hotspot/vouchers'),
+    },
+    {
+      title: 'Statistics',
+      icon: BarChart3,
+      href: withRouterPrefix(routerId, '/hotspot/stats'),
+    },
+  ]
+
+  const systemNavItems = [
+    {
+      title: 'Networks',
+      icon: Network,
+      href: withRouterPrefix(routerId, '/networks'),
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      href: withRouterPrefix(routerId, '/settings'),
+    },
+  ]
 
   return (
     <Sidebar>
@@ -203,12 +210,6 @@ export function AppSidebar({ selectedRouter, onRouterChange }: AppSidebarProps) 
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Hotspot Management - Only show if router is selected */}
-        {isRouterSelected && (
-          <SidebarGroup>
             <Collapsible open={isHotspotOpen} onOpenChange={setIsHotspotOpen}>
               <SidebarGroupLabel asChild>
                 <CollapsibleTrigger className="flex w-full items-center justify-between">
@@ -240,28 +241,21 @@ export function AppSidebar({ selectedRouter, onRouterChange }: AppSidebarProps) 
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>
+                  <SidebarMenu>
+                  {systemNavItems.map((item) => (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={pathname === item.href}>
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
                 </SidebarGroupContent>
               </CollapsibleContent>
             </Collapsible>
-          </SidebarGroup>
-        )}
-
-        {/* System */}
-        <SidebarGroup>
-          <SidebarGroupLabel>System</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {systemNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href}>
-                    <Link href={item.href}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

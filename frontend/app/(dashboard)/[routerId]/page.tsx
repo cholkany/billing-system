@@ -19,8 +19,14 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useRouter } from '@/contexts/router-context'
-import { Empty } from '@/components/ui/empty'
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty'
 import Link from 'next/link'
 import {
   ChartConfig,
@@ -29,6 +35,8 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { Area, AreaChart, Bar, BarChart, XAxis, YAxis } from 'recharts'
+import { routers } from '@/store/data'
+import { useParams } from 'next/navigation'
 
 // Mock data
 const trafficData = [
@@ -78,20 +86,30 @@ const activityChartConfig = {
   },
 } satisfies ChartConfig
 
-export default function DashboardPage() {
-  const { selectedRouter } = useRouter()
+export default function DashboardPage({ params }: { params: { routerId: string } }) {
+  const { routerId } = useParams()
+
+  const selectedRouter = routers.find(router => router.id === routerId)
+
 
   if (!selectedRouter) {
     return (
       <div className="flex flex-1 items-center justify-center min-h-[60vh]">
-        <Empty
-          icon={Wifi}
-          title="No router selected"
-          description="Select a router from the sidebar to view its dashboard."
-        >
-          <Button asChild>
-            <Link href="/routers">View Routers</Link>
-          </Button>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Wifi />
+            </EmptyMedia>
+            <EmptyTitle>No router selected</EmptyTitle>
+            <EmptyDescription>
+              Select a router from the sidebar to view its dashboard.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <Link href="/routers">View Routers</Link>
+            </Button>
+          </EmptyContent>
         </Empty>
       </div>
     )

@@ -206,6 +206,32 @@ Once the stack is running:
 
 Specific UI flows (screenshots, default credentials, etc.) will depend on how you deploy and seed the database. You can adapt this section with more detailed steps as your implementation evolves.
 
+### Remote router provisioning (WireGuard)
+
+Routers can be added to the system by running a script **on the physical MikroTik device**. The script registers the router with the billing API and configures **WireGuard** so the server can reach the router over a VPN for remote management (no need to expose the RouterOS API to the internet).
+
+1. **On the billing server**
+   - Set environment variables (e.g. in `docker-compose` or `.env`):
+     - `PROVISION_API_KEY` – secret key that routers use to call the provisioning API (e.g. a long random string).
+     - `WIREGUARD_SERVER_PUBLIC_KEY` – public key of the server’s WireGuard interface.
+     - `WIREGUARD_SERVER_ENDPOINT` – reachable address of the server for WireGuard, e.g. `vpn.example.com:51820`.
+     - `WIREGUARD_NETWORK` – VPN subnet for routers (default `10.100.0.0/24`). The server should use an address in this subnet (e.g. `10.100.0.1/24`).
+   - Run the database migration that adds WireGuard columns to `routers`:  
+     `psql` or apply `backend/drizzle/0001_wireguard_routers.sql`.
+   - Configure WireGuard on the server (one interface, e.g. `wg0`). After each router provisions, **add that router as a peer** on the server using the router’s public key and the assigned VPN IP (stored in the DB as `wireguard_vpn_address`). You can do this manually or with a small script that reads from the API/DB.
+
+2. **On each MikroTik router (RouterOS 7.x)**
+   - Copy the script from `scripts/router-provision.rsc` into the router (e.g. System → Scripts, or paste in terminal).
+   - Edit the config block at the top: `billingUrl`, `provisionKey`, `routerName`, `location`, `apiUser`, `apiPass`.
+   - Run the script once. It will:
+     - Create a WireGuard interface and get its public key.
+     - POST to `POST /provision/router?format=routeros` with the public key and router details.
+     - Apply the assigned VPN address and add the billing server as a WireGuard peer.
+   - Ensure the router can reach the billing server over HTTPS. If the server uses a self-signed certificate, you may need to disable certificate verification in the script’s fetch command.
+
+3. **After provisioning**
+   - The backend uses the router’s **WireGuard VPN address** (when set) to connect to the MikroTik API, so the server only needs to reach the router over the VPN; no public RouterOS API exposure is required.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -219,7 +245,7 @@ Specific UI flows (screenshots, default credentials, etc.) will depend on how yo
 - [ ] Advanced billing rules (quotas, overage, discounts)
 - [ ] Multi‑tenant / multi‑site support
 - [ ] Reporting and analytics dashboards
-- [ ] Remote Router Connection
+- [x] Remote Router Connection (WireGuard provisioning script)
 - [ ] Multi‑language UI support
 
 

@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt';
 
 import authApp from './routes/auth.js';
+import provisionApp from './routes/provision.js';
 import routersApp from './routes/routers.js';
 import networksApp from './routes/networks.js';
 import profilesApp from './routes/profiles.js';
@@ -22,8 +23,9 @@ app.get('/', (c) => {
   return c.text('MikroTik Billing System API');
 });
 
-// Public Routes
+// Public Routes (no JWT)
 app.route('/auth', authApp);
+app.route('/provision', provisionApp);
 
 // Protected Routes setup
 app.use('/api/*', (c, next) => {

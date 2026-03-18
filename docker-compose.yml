@@ -23,6 +23,11 @@ services:
       - DATABASE_URL=postgresql://admin:admin@postgres:5432/mikrotik_billing
       - JWT_SECRET=supersecret123
       - PORT=8787
+      # Optional: for router provisioning + WireGuard remote management
+      # - PROVISION_API_KEY=your-secret-provision-key
+      # - WIREGUARD_SERVER_PUBLIC_KEY=server-wg-public-key
+      # - WIREGUARD_SERVER_ENDPOINT=host:51820
+      # - WIREGUARD_NETWORK=10.100.0.0/24
     depends_on:
       - postgres
     networks:

@@ -10,6 +10,9 @@ export const routers = pgTable('routers', {
   location: text('location'),
   status: text('status').default('offline'),
   createdAt: timestamp('created_at').defaultNow(),
+  // WireGuard remote management: when set, backend connects via VPN
+  wireguardPublicKey: text('wireguard_public_key'),
+  wireguardVpnAddress: text('wireguard_vpn_address'),
 });
 
 export const networks = pgTable('networks', {

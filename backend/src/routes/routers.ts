@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { MikroTikClient } from '../mikrotik.js';
+import { getRouterConnectHost } from '../router-utils.js';
 
 const routersApp = new Hono();
 
@@ -55,7 +56,7 @@ routersApp.post('/:id/test', async (c) => {
   
   const r = router[0];
   const client = new MikroTikClient({
-    host: r.ipAddress,
+    host: getRouterConnectHost(r),
     port: r.apiPort,
     user: r.username,
     password: r.password,

@@ -29,7 +29,7 @@ const steps = [
   { id: 'verify', title: 'Verification', description: 'Confirm connection' },
 ]
 
-const setupScripts = {
+const defaultScripts = {
   api: `/ip service set api disabled=no
 /ip service set api-ssl disabled=no
 /user add name=mikrobill group=full password=YOUR_SECURE_PASSWORD`,
@@ -50,6 +50,14 @@ export default function AddRouterPage() {
   const [testResult, setTestResult] = React.useState<'success' | 'error' | null>(null)
   const [verificationStatus, setVerificationStatus] = React.useState<'idle' | 'verifying' | 'success' | 'error'>('idle')
   const [copiedScript, setCopiedScript] = React.useState<string | null>(null)
+  const [provisionToken, setProvisionToken] = React.useState<string | null>(null)
+
+  const setupScripts = {
+    bootstrap: provisionToken
+      ? `/tool fetch mode=http url="${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'}/provision/${provisionToken}" dst-path=setup.rsc\n:delay 2s\n/import setup.rsc`
+      : 'Loading provision token...',
+    ...defaultScripts
+  }
   
   const [formData, setFormData] = React.useState({
     name: '',
@@ -103,7 +111,6 @@ export default function AddRouterPage() {
 
   const handleSubmit = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
     router.push('/routers')
   }
 
@@ -288,11 +295,12 @@ export default function AddRouterPage() {
                 </AlertDescription>
               </Alert>
 
-              <Tabs defaultValue="api" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+              <Tabs defaultValue="bootstrap" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="bootstrap">Auto Config</TabsTrigger>
                   <TabsTrigger value="api">Enable API</TabsTrigger>
-                  <TabsTrigger value="firewall">Firewall Rules</TabsTrigger>
-                  <TabsTrigger value="wireguard">WireGuard VPN</TabsTrigger>
+                  <TabsTrigger value="firewall">Firewall</TabsTrigger>
+                  <TabsTrigger value="wireguard">VPN</TabsTrigger>
                 </TabsList>
                 {Object.entries(setupScripts).map(([key, script]) => (
                   <TabsContent key={key} value={key} className="space-y-3">
@@ -410,9 +418,41 @@ export default function AddRouterPage() {
         
         {currentStep < steps.length - 1 ? (
           <Button
-            onClick={() => setCurrentStep((s) => s + 1)}
-            disabled={!canProceed()}
+            onClick={async () => {
+              if (currentStep === 0) {
+                setIsLoading(true)
+                try {
+                  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'}/api/routers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: formData.name,
+                      ipAddress: formData.ip,
+                      apiPort: parseInt(formData.port),
+                      username: formData.username,
+                      password: formData.password,
+                      location: formData.location
+                    })
+                  })
+                  if (res.ok) {
+                    const data = await res.json()
+                    if (data.provisionToken) setProvisionToken(data.provisionToken)
+                    setCurrentStep(1)
+                  } else {
+                    console.error("Failed to create router")
+                  }
+                } catch (error) {
+                  console.error(error)
+                } finally {
+                  setIsLoading(false)
+                }
+              } else {
+                setCurrentStep((s) => s + 1)
+              }
+            }}
+            disabled={!canProceed() || (currentStep === 0 && isLoading)}
           >
+            {currentStep === 0 && isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Next
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

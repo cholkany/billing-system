@@ -47,6 +47,21 @@ services:
     networks:
       - billing_net
 
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - SERVERPORT=13231
+    volumes:
+      - ./wireguard/config:/config
+    ports:
+      - "13231:13231/udp"
+    networks:
+      - billing_net
+
 networks:
   billing_net:
     driver: bridge

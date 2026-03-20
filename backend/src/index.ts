@@ -43,8 +43,13 @@ app.route('/api/users', usersApp);
 app.route('/api/vouchers', vouchersApp);
 app.route('/api/stats', statsApp);
 
+import { startRouterMonitor } from './services/monitor.js';
+
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8787;
 console.log(`Server is running on port ${port}`);
+
+// Start the background router monitor
+startRouterMonitor();
 
 serve({
   fetch: app.fetch,

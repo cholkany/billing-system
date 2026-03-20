@@ -60,3 +60,19 @@ export const vouchers = pgTable('vouchers', {
   createdAt: timestamp('created_at').defaultNow(),
   usedAt: timestamp('used_at'),
 });
+
+// stores VPN + provisioning info
+export const routerVpn = pgTable("router_vpn", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  routerId: uuid("router_id").notNull(),
+
+  privateKey: text("private_key").notNull(),
+  publicKey: text("public_key").notNull(),
+
+  vpnIp: text("vpn_ip").notNull(),
+
+  provisionToken: text("provision_token").notNull(),
+  tokenExpiresAt: timestamp("token_expires_at"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+});

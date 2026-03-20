@@ -49,5 +49,32 @@ export class MikroTikClient {
     }
   }
 
-  // Add more methods as needed for Profiles, Vouchers, Active Users etc.
+  // Auto Config Methods
+  async createHotspotProfile(name: string, rateLimit?: string, sharedUsers?: number) {
+    try {
+      await this.connect();
+      const cmd = ['/ip/hotspot/user/profile/add', `=name=${name}`];
+      if (rateLimit) cmd.push(`=rate-limit=${rateLimit}`);
+      if (sharedUsers) cmd.push(`=shared-users=${sharedUsers}`);
+      const result = await this.api.write(cmd);
+      await this.disconnect();
+      return result;
+    } catch (error: any) {
+      throw new Error(`Failed to create profile: ${error.message}`);
+    }
+  }
+
+  async addHotspotUser(username: string, password?: string, profile?: string) {
+    try {
+      await this.connect();
+      const cmd = ['/ip/hotspot/user/add', `=name=${username}`];
+      if (password) cmd.push(`=password=${password}`);
+      if (profile) cmd.push(`=profile=${profile}`);
+      const result = await this.api.write(cmd);
+      await this.disconnect();
+      return result;
+    } catch (error: any) {
+      throw new Error(`Failed to add user: ${error.message}`);
+    }
+  }
 }

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   Router,
@@ -74,7 +74,7 @@ export function AppSidebar({ selectedRouter, onRouterChange }: AppSidebarProps) 
   )
 
   const isRouterSelected = !!selectedRouter
-  const routerId = selectedRouter?.id
+  const routerId = useParams().routerId as string
 
   const mainNavItems = [
     {
